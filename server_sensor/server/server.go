@@ -26,6 +26,7 @@ func (s *Server) setIpAndPort(ip, port string) {
 
 // Cria a conexão tcp com os clientes, chamando a goroutine para tratá-los
 func (s Server) Service(ipAndPort ...string) {
+	log.Println("[SERVER]")
 	if ipAndPort != nil {
 		s.setIpAndPort(ipAndPort[0], ipAndPort[1])
 	}
@@ -41,10 +42,7 @@ func (s Server) Service(ipAndPort ...string) {
 
 	for {
 		// aceita conexoes com clientes
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Printf("[-]Error %v\n", err)
-		}
+		conn, _ := listener.Accept()
 		log.Println("[+]Conexao recebida de: ", conn.RemoteAddr())
 		// inicia a goroutine para aceitar múltiplos clientes
 		go s.handleConnection(conn)
@@ -61,16 +59,24 @@ func (s *Server) handleConnection(conn net.Conn) {
 		if err != nil {
 			log.Printf("[-]ERROR: %v\n", err)
 		}
+
 		// mensagem recebida e tratada
 		tbuffer := strings.TrimSpace(string(buffer))
 		toSend, err := s.parse(tbuffer)
+
 		if err != nil {
 			// diz que foi criado
-			log.Println(err)
 			_, err = conn.Write([]byte(toSend))
 		} else {
+
 			// salva retorna o valor solicitado
-			conn.Write([]byte(toSend))
+			if toSend == "" {
+				toSend = "No content"
+				conn.Write([]byte("No content"))
+
+			} else {
+				conn.Write([]byte(toSend))
+			}
 		}
 		log.Println("[+]Resposta '", toSend, "' enviada para: ", conn.RemoteAddr())
 	}

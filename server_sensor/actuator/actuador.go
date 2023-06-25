@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -15,7 +16,8 @@ type Actuator struct {
 
 // solicita, a cada 10s, informações de luminosidade ao servidor
 func (a Actuator) Request() {
-	const message string = "ASSINAR, LUMINOSIDADE"
+	log.Println("[ACTUADOR]")
+	const MESSAGE string = "ASSINAR, LUMINOSIDADE"
 
 	buffer := make([]byte, 2048)
 
@@ -28,18 +30,19 @@ func (a Actuator) Request() {
 	log.Println("[+]Conectado ao servidor em: ", a.ServerIp, a.ServerPort)
 
 	for {
-		log.Println("[+]Esperando 10s")
-		time.Sleep(10 * time.Second)
-		_, err = conn.Write([]byte(message + "\n"))
 		log.Println("[+]Solicitando informacoes de luminosidade...")
+
+		_, err = conn.Write([]byte(MESSAGE + "\n"))
 		if err != nil {
 			log.Panicln(err)
 		}
-		response, err := conn.Read(buffer)
+		_, err := conn.Read(buffer)
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println("[+]Resposta do servidor: ", string(response))
+		log.Println("[+]Resposta do servidor: ", strings.TrimSpace(string(buffer)))
+		log.Println("[+]Esperando 10s")
+		time.Sleep(10 * time.Second)
 	}
 }
 
