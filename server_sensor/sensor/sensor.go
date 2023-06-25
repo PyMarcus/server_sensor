@@ -1,14 +1,15 @@
-package main
+package sensor
 
 import (
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
+	"strconv"
 	"time"
-)
 
-const MESSAGE string = "PUBLICAR, LUMINOSIDADE, 50"
+	"github.com/fatih/color"
+)
 
 type Sensor struct {
 	ServerIp   string
@@ -23,6 +24,8 @@ func detectLuminosity() int {
 
 // envia para o servidor a luminosidade detectada, a cada 5s
 func (s Sensor) Post() {
+	color.Set(color.FgGreen, color.BgBlack)
+
 	log.Println("[SENSOR]")
 
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%s", s.ServerIp, s.ServerPort))
@@ -36,17 +39,14 @@ func (s Sensor) Post() {
 		log.Println("[+]Detectando luminosidade...")
 		lumen := detectLuminosity()
 		log.Println("[+]Detectado o valor de ", lumen, "lm.")
+		MESSAGE := fmt.Sprintf("PUBLICAR, LUMINOSIDADE, %s", strconv.Itoa(lumen))
+		log.Println("ENVIANDO: ", MESSAGE)
 		_, err := conn.Write([]byte(MESSAGE + "\n"))
 
 		if err != nil {
 			log.Panicln(err)
 		}
-		log.Println("[+]Valor enviado ao servidor")
+		log.Println("[+]Valor enviado ao servidor\n")
 		time.Sleep(5 * time.Second)
 	}
-}
-
-func main() {
-	sensor := Sensor{ServerIp: "127.0.0.1", ServerPort: "9999"}
-	sensor.Post()
 }

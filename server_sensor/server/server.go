@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"bufio"
@@ -7,6 +7,8 @@ import (
 	"log"
 	"net"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // Armazena as informações enviadas pelo cliente sensor do tipo chave, valor
@@ -26,6 +28,7 @@ func (s *Server) setIpAndPort(ip, port string) {
 
 // Cria a conexão tcp com os clientes, chamando a goroutine para tratá-los
 func (s Server) Service(ipAndPort ...string) {
+	color.Set(color.FgYellow, color.BgBlack)
 	log.Println("[SERVER]")
 	if ipAndPort != nil {
 		s.setIpAndPort(ipAndPort[0], ipAndPort[1])
@@ -43,6 +46,7 @@ func (s Server) Service(ipAndPort ...string) {
 	for {
 		// aceita conexoes com clientes
 		conn, _ := listener.Accept()
+		defer conn.Close()
 		log.Println("[+]Conexao recebida de: ", conn.RemoteAddr())
 		// inicia a goroutine para aceitar múltiplos clientes
 		go s.handleConnection(conn)
@@ -78,7 +82,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 				conn.Write([]byte(toSend))
 			}
 		}
-		log.Println("[+]Resposta '", toSend, "' enviada para: ", conn.RemoteAddr())
+		log.Println("[+]Resposta '", toSend, "' enviada para: ", conn.RemoteAddr(), "\n")
 	}
 }
 
@@ -103,9 +107,4 @@ func (s Server) parse(message string) (toSend string, err error) {
 	}
 
 	return "created!", errors.New("Created!")
-}
-
-func main() {
-	server := Server{Ip: "127.0.0.1", Port: "9999"}
-	server.Service()
 }
