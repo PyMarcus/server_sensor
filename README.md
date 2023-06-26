@@ -14,10 +14,13 @@ Trabalho prático de redes1
 
 ### Como executar:
 
-  go mod tidy
+    go mod tidy
 
-  go run main.go -server [ip] [port]
 
-  go run main.go -sensor [ip] [port]
+    go run main.go -server [ip] [port]
 
-  go run main.go -actuator [ip] [port]
+
+    go run main.go -sensor [ip] [port]
+
+
+    go run main.go -actuator [ip] [port]
